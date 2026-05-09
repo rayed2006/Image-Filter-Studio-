@@ -15,13 +15,15 @@ This project was designed as a showcase of Object-Oriented Programming (OOP) con
 - **Multiple Inheritance**: `Image` class implements both `Saveable` and `Previewable` interfaces.
 - **Polymorphism**: Virtual functions used for the Filter logic and User login permissions.
 - **Memory Management**: Full manual control over heap memory (No STL containers like `vector` or `map` used).
+## Demo
+- 1)Register/Login as a Customer.
+- 2)Load a .jpg image.
+- 3)Build a pipeline: Grayscale -> Box Blur -> Flip Horizontal.
+- 4)Preview in ASCII and save as a new PNG.
 
 ##  How to Build
 Compile all files using g++:
 ```bash
 g++ *.cpp -o ImageStudio
-## **Demo**
-1)Register/Login as a Customer.
-2)Load a .jpg image.
-3)Build a pipeline: Grayscale -> Box Blur -> Flip Horizontal.
-4)Preview in ASCII and save as a new PNG.
+
+
