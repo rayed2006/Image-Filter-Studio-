@@ -1,8 +1,7 @@
-# Image-Filter-Studio-
+# Image Filter Studio (C++)-
 FAST semester 2 final project 2026
-# Image Filter Studio (C++)
 
-A robust console-based image processing application built in C++. This project was designed as a showcase of Object-Oriented Programming (OOP) concepts, specifically focusing on manual memory management and runtime polymorphism.
+This project was designed as a showcase of Object-Oriented Programming (OOP) concepts, specifically focusing on manual memory management and runtime polymorphism.
 
 ## Key Features
 - **Real Image I/O**: Loads and saves real `.jpg` and `.png` files using the `stb` library.
@@ -21,3 +20,8 @@ A robust console-based image processing application built in C++. This project w
 Compile all files using g++:
 ```bash
 g++ *.cpp -o ImageStudio
+## **Demo**
+1)Register/Login as a Customer.
+2)Load a .jpg image.
+3)Build a pipeline: Grayscale -> Box Blur -> Flip Horizontal.
+4)Preview in ASCII and save as a new PNG.
