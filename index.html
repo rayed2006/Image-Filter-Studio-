@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Filter Studio 2.0</title>
+    <!-- Tailwind CSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            950: '#020617',
+                        }
+                    },
+                    boxShadow: {
+                        'neon-indigo': '0 0 15px rgba(99, 102, 241, 0.4)',
+                        'neon-emerald': '0 0 15px rgba(16, 185, 129, 0.4)',
+                        'neon-rose': '0 0 15px rgba(244, 63, 94, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- React & ReactDOM CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel Standalone CDN for compiling JSX in browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Custom Scrollbars and Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #F6F3EC;
+            color: #2A241E;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F6F3EC;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E5DFD4;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #D5CFC2;
+        }
+        
+        /* Cream Theme Glass Panel Override */
+        .glass-panel {
+            background: #FFFFFF !important;
+            border: 1px solid #E6E1D6 !important;
+            box-shadow: 0 4px 20px -2px rgba(42, 36, 30, 0.02), 0 2px 6px -1px rgba(42, 36, 30, 0.02) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        /* Border Overrides */
+        .border-white\/5, .border-white\/10, .border-white\/20 {
+            border-color: #E6E1D6 !important;
+        }
+
+        /* Background Overrides */
+        main {
+            background: #FAF8F4 !important;
+        }
+        .bg-slate-950 {
+            background-color: #F6F3EC !important;
+        }
+        .bg-slate-950\/80 {
+            background-color: #FFFFFF !important;
+            border: 1px solid #E6E1D6 !important;
+        }
+        .bg-slate-900 {
+            background-color: #FAF8F4 !important;
+        }
+        .bg-slate-900\/40, .bg-slate-900\/50, .bg-slate-900\/60, .bg-slate-900\/80, .bg-slate-900\/90 {
+            background-color: #FAF8F4 !important;
+            border: 1px solid #E6E1D6 !important;
+        }
+        .bg-slate-850 {
+            background-color: #F0EDE5 !important;
+        }
+
+        /* Text Overrides to Dark Charcoal / Warm Browns */
+        .text-slate-100, .text-slate-200, .text-slate-300 {
+            color: #2A241E !important;
+        }
+        .text-slate-400 {
+            color: #70675D !important;
+        }
+        .text-slate-500, .text-slate-600 {
+            color: #8C8276 !important;
+        }
+
+        /* Primary Indigo Accent Override (Matte Black / Charcoal) */
+        .bg-indigo-600 {
+            background-color: #2A241E !important;
+        }
+        .hover\:bg-indigo-500:hover {
+            background-color: #40382E !important;
+            color: #FFFFFF !important;
+        }
+        .text-indigo-400, .text-indigo-300 {
+            color: #2A241E !important;
+            font-weight: 600;
+        }
+        .bg-indigo-600\/10 {
+            background-color: #FAF8F4 !important;
+            color: #2A241E !important;
+            border: 1px solid #2A241E !important;
+        }
+        .shadow-indigo-500\/20 {
+            box-shadow: none !important;
+        }
+
+        /* Emerald/Green (Sage/Forest Green) */
+        .bg-emerald-600 {
+            background-color: #3E5A4E !important;
+        }
+        .hover\:bg-emerald-500:hover {
+            background-color: #4D6E60 !important;
+        }
+        .bg-emerald-500\/5, .bg-emerald-500\/10 {
+            background-color: #F1F5F2 !important;
+            color: #3E5A4E !important;
+            border-color: #D2DFD8 !important;
+        }
+        .text-emerald-400 {
+            color: #3E5A4E !important;
+        }
+        .shadow-neon-emerald\/5 {
+            box-shadow: none !important;
+        }
+        .bg-emerald-600\/10 {
+            background-color: #F1F5F2 !important;
+            color: #3E5A4E !important;
+            border-color: #D2DFD8 !important;
+        }
+
+        /* Red Destructive Override (Muted Terra Cotta) */
+        .bg-red-500\/10, .bg-red-600\/10 {
+            background-color: #FDF2F2 !important;
+            color: #9B2C2C !important;
+            border-color: #F5D0D0 !important;
+        }
+        .text-red-400 {
+            color: #C53030 !important;
+        }
+        .hover\:bg-red-500:hover, .hover\:bg-red-650:hover, .hover\:bg-red-600:hover {
+            background-color: #9B2C2C !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Yellow Alert (Soft Warm Sand) */
+        .bg-yellow-600\/10 {
+            background-color: #FEF9EB !important;
+            color: #8A6D1C !important;
+            border-color: #F6E5C1 !important;
+        }
+        .hover\:bg-yellow-600:hover {
+            background-color: #8A6D1C !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Toggle Button styling overrides */
+        .bg-slate-700 {
+            background-color: #FAF8F4 !important;
+            border: 1px solid #E6E1D6 !important;
+        }
+        .bg-indigo-500 {
+            background-color: #2A241E !important;
+        }
+
+        /* ASCII Console Paper Mode */
+        pre {
+            background-color: #FDFBF7 !important;
+            color: #4A4238 !important;
+            border: 1px solid #E6E1D6 !important;
+        }
+
+        /* H1 logo gradient override */
+        h1.bg-gradient-to-r {
+            background: none !important;
+            background-clip: unset !important;
+            -webkit-background-clip: unset !important;
+            color: #2A241E !important;
+        }
+
+        /* Soft Shadow and Border cleanups */
+        .shadow-2xl, .shadow-xl {
+            box-shadow: 0 4px 20px -2px rgba(42, 36, 30, 0.02), 0 2px 6px -1px rgba(42, 36, 30, 0.02) !important;
+        }
+        .glow-hover:hover {
+            box-shadow: none !important;
+            border-color: #2A241E !important;
+        }
+
+        /* Fix select element colors */
+        input[type="text"], input[type="password"] {
+            background-color: #FAF8F4 !important;
+            border: 1px solid #E6E1D6 !important;
+            color: #2A241E !important;
+        }
+        input[type="text"]::placeholder, input[type="password"]::placeholder {
+            color: #A69D92 !important;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #2A241E !important;
+            outline: none;
+        }
+
+        /* Brightness input slider */
+        input[type="range"] {
+            accent-color: #2A241E;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col selection:bg-stone-900/10 selection:text-stone-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Simulated Database (db.js) ---
+        const initDB = () => {
+            if (!localStorage.getItem('ifs_customers')) {
+                localStorage.setItem('ifs_customers', JSON.stringify([
+                    { cnic: "3520112345678", password: "Pass12345", fullName: "Rayed Rizwan", isBlocked: false },
+                    { cnic: "1234567891234", password: "Pass12345", fullName: "Ray Blocked", isBlocked: true }
+                ]));
+            }
+            if (!localStorage.getItem('ifs_sessions')) {
+                localStorage.setItem('ifs_sessions', JSON.stringify([
+                    { cnic: "3520112345678", timestamp: "2026-05-02 19:42:35", pipeline: "Invert>FlipVertical>", outputPath: "3520112345678_20260502_194235.png" },
+                    { cnic: "1234567891234", timestamp: "2026-05-06 16:21:29", pipeline: "GreenChannel>", outputPath: "1234567891234_20260506_162129.png" }
+                ]));
+            }
+            if (!localStorage.getItem('ifs_catalog')) {
+                localStorage.setItem('ifs_catalog', JSON.stringify([
+                    { id: 1, name: "Grayscale", label: "Grayscale", desc: "Averages all RGB color channels", active: true },
+                    { id: 2, name: "Invert", label: "Invert Colors", desc: "Subtracts channels from 255", active: true },
+                    { id: 3, name: "Brightness", label: "Adjust Brightness", desc: "Shifts color values uniformly", active: true },
+                    { id: 4, name: "ContrastStretch", label: "Contrast Stretch", desc: "Normalizes contrast bounds [0-255]", active: true },
+                    { id: 5, name: "RedChannel", label: "Red Channel", desc: "Isolates red, removes green and blue", active: true },
+                    { id: 6, name: "GreenChannel", label: "Green Channel", desc: "Isolates green, removes red and blue", active: true },
+                    { id: 7, name: "BlueChannel", label: "Blue Channel", desc: "Isolates blue, removes red and green", active: true },
+                    { id: 8, name: "BoxBlur", label: "Box Blur", desc: "Applies 3x3 box blur filter", active: true },
+                    { id: 9, name: "FlipHorizontal", label: "Flip Horizontal", desc: "Mirrors image horizontally", active: true },
+                    { id: 10, name: "FlipVertical", label: "Flip Vertical", desc: "Mirrors image vertically", active: true }
+                ]));
+            }
+        };
+        initDB();
+
+        const getCustomers = () => JSON.parse(localStorage.getItem('ifs_customers'));
+        const saveCustomers = (data) => localStorage.setItem('ifs_customers', JSON.stringify(data));
+        const getSessions = () => JSON.parse(localStorage.getItem('ifs_sessions'));
+        const saveSessions = (data) => localStorage.setItem('ifs_sessions', JSON.stringify(data));
+        const getCatalog = () => JSON.parse(localStorage.getItem('ifs_catalog'));
+        const saveCatalog = (data) => localStorage.setItem('ifs_catalog', JSON.stringify(data));
+
+        // --- Inline Custom SVG Components (lucide icons replacement) ---
+        const IconUser = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        );
+        const IconLock = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        );
+        const IconUnlock = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+        );
+        const IconShield = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        );
+        const IconPlus = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5v14"/></svg>
+        );
+        const IconTrash = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+        );
+        const IconLogout = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        );
+        const IconHistory = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></svg>
+        );
+        const IconDownload = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        );
+        const IconImage = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        );
+        const IconToggle = ({ active }) => (
+            <div className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${active ? 'bg-indigo-500' : 'bg-slate-700'}`}>
+                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${active ? 'translate-x-5' : 'translate-x-0'}`}></div>
+            </div>
+        );
+        const IconTerminal = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+        );
+        const IconEye = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        );
+        const IconCheck = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        );
+        const IconSparkles = () => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+        );
+
+        // --- Core Image Filter Math Algorithms on Canvas ImageData ---
+        const applyFiltersToImageData = (imgData, pipeline, brightnessVal) => {
+            const data = imgData.data;
+            const w = imgData.width;
+            const h = imgData.height;
+
+            pipeline.forEach(filterName => {
+                switch (filterName) {
+                    case 'Grayscale':
+                        for (let i = 0; i < data.length; i += 4) {
+                            const avg = Math.floor((data[i] + data[i+1] + data[i+2]) / 3);
+                            data[i] = avg;
+                            data[i+1] = avg;
+                            data[i+2] = avg;
+                        }
+                        break;
+                    case 'Invert':
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = 255 - data[i];
+                            data[i+1] = 255 - data[i+1];
+                            data[i+2] = 255 - data[i+2];
+                        }
+                        break;
+                    case 'Brightness':
+                        const v = parseInt(brightnessVal, 10) || 0;
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = Math.min(255, Math.max(0, data[i] + v));
+                            data[i+1] = Math.min(255, Math.max(0, data[i+1] + v));
+                            data[i+2] = Math.min(255, Math.max(0, data[i+2] + v));
+                        }
+                        break;
+                    case 'ContrastStretch':
+                        let mi = 255, ma = 0;
+                        for (let i = 0; i < data.length; i += 4) {
+                            const r = data[i], g = data[i+1], b = data[i+2];
+                            mi = Math.min(mi, r, g, b);
+                            ma = Math.max(ma, r, g, b);
+                        }
+                        if (ma > mi) {
+                            const scale = 255 / (ma - mi);
+                            for (let i = 0; i < data.length; i += 4) {
+                                data[i] = Math.floor((data[i] - mi) * scale);
+                                data[i+1] = Math.floor((data[i+1] - mi) * scale);
+                                data[i+2] = Math.floor((data[i+2] - mi) * scale);
+                            }
+                        }
+                        break;
+                    case 'RedChannel':
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i+1] = 0;
+                            data[i+2] = 0;
+                        }
+                        break;
+                    case 'GreenChannel':
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = 0;
+                            data[i+2] = 0;
+                        }
+                        break;
+                    case 'BlueChannel':
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = 0;
+                            data[i+1] = 0;
+                        }
+                        break;
+                    case 'BoxBlur':
+                        const src = new Uint8ClampedArray(data);
+                        for (let y = 0; y < h; y++) {
+                            for (let x = 0; x < w; x++) {
+                                let rTotal = 0, gTotal = 0, bTotal = 0, count = 0;
+                                for (let dy = -1; dy <= 1; dy++) {
+                                    for (let dx = -1; dx <= 1; dx++) {
+                                        const ny = y + dy;
+                                        const nx = x + dx;
+                                        if (ny >= 0 && ny < h && nx >= 0 && nx < w) {
+                                            const idx = 4 * (ny * w + nx);
+                                            rTotal += src[idx];
+                                            gTotal += src[idx+1];
+                                            bTotal += src[idx+2];
+                                            count++;
+                                        }
+                                    }
+                                }
+                                const idx = 4 * (y * w + x);
+                                data[idx] = Math.floor(rTotal / count);
+                                data[idx+1] = Math.floor(gTotal / count);
+                                data[idx+2] = Math.floor(bTotal / count);
+                            }
+                        }
+                        break;
+                    case 'FlipHorizontal':
+                        for (let y = 0; y < h; y++) {
+                            for (let x = 0; x < Math.floor(w / 2); x++) {
+                                const idx1 = 4 * (y * w + x);
+                                const idx2 = 4 * (y * w + (w - 1 - x));
+                                for (let c = 0; c < 4; c++) {
+                                    const temp = data[idx1 + c];
+                                    data[idx1 + c] = data[idx2 + c];
+                                    data[idx2 + c] = temp;
+                                }
+                            }
+                        }
+                        break;
+                    case 'FlipVertical':
+                        for (let y = 0; y < Math.floor(h / 2); y++) {
+                            for (let x = 0; x < w; x++) {
+                                const idx1 = 4 * (y * w + x);
+                                const idx2 = 4 * ((h - 1 - y) * w + x);
+                                for (let c = 0; c < 4; c++) {
+                                    const temp = data[idx1 + c];
+                                    data[idx1 + c] = data[idx2 + c];
+                                    data[idx2 + c] = temp;
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            });
+        };
+
+        // --- Generate ASCII Art string (maps average to {' ', '.', ':', '-', '=', '+', '*', '#', '@'}) ---
+        const generateASCII = (imgData) => {
+            const data = imgData.data;
+            const w = imgData.width;
+            const h = imgData.height;
+            const map = [' ', '.', ':', '-', '=', '+', '*', '#', '@'];
+            
+            // Scaled down step calculation (target bounds ~ 40 cols, 20 rows)
+            const rowStep = Math.max(1, Math.floor(h / 20));
+            const colStep = Math.max(1, Math.floor(w / 40));
+            let result = "";
+
+            for (let y = 0; y < h; y += rowStep) {
+                let line = "";
+                for (let x = 0; x < w; x += colStep) {
+                    const idx = 4 * (y * w + x);
+                    if (idx >= data.length) continue;
+                    const avg = Math.floor((data[idx] + data[idx+1] + data[idx+2]) / 3);
+                    const mapIdx = Math.min(8, Math.max(0, Math.floor((avg * 8) / 255)));
+                    line += map[mapIdx];
+                }
+                result += line + "\n";
+            }
+            return result;
+        };
+
+        // --- MAIN APP WRAPPER ---
+        const App = () => {
+            const [currentUser, setCurrentUser] = useState(null); // { role: 'customer'|'admin', data: Object }
+            const [activeView, setActiveView] = useState('auth'); // auth, customer_dashboard, admin_dashboard
+
+            useEffect(() => {
+                // Keep session on reload if logged in
+                const cachedUser = sessionStorage.getItem('ifs_user');
+                if (cachedUser) {
+                    const parsed = JSON.parse(cachedUser);
+                    setCurrentUser(parsed);
+                    setActiveView(parsed.role === 'admin' ? 'admin_dashboard' : 'customer_dashboard');
+                }
+            }, []);
+
+            const handleLogin = (userType, userObj) => {
+                const sessionUser = { role: userType, data: userObj };
+                setCurrentUser(sessionUser);
+                sessionStorage.setItem('ifs_user', JSON.stringify(sessionUser));
+                setActiveView(userType === 'admin' ? 'admin_dashboard' : 'customer_dashboard');
+            };
+
+            const handleLogout = () => {
+                sessionStorage.removeItem('ifs_user');
+                setCurrentUser(null);
+                setActiveView('auth');
+            };
+
+            return (
+                <div className="flex-1 flex flex-col">
+                    {/* Header */}
+                    <header className="glass-panel border-b border-white/5 py-4 px-6 flex justify-between items-center shadow-lg sticky top-0 z-50">
+                        <div className="flex items-center space-x-3">
+                            <div className="bg-indigo-600 p-2.5 rounded-xl shadow-indigo-500/20 shadow-md">
+                                <IconSparkles />
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                    IMAGE FILTER STUDIO
+                                </h1>
+                                <p className="text-[10px] tracking-widest text-slate-400 font-medium">V2.0 HIGH-FIDELITY</p>
+                            </div>
+                        </div>
+                        
+                        {currentUser && (
+                            <div className="flex items-center space-x-4">
+                                <div className="text-right">
+                                    <p className="text-sm font-semibold text-slate-200">
+                                        {currentUser.role === 'admin' ? 'System Administrator' : currentUser.data.fullName}
+                                    </p>
+                                    <p className="text-[10px] text-indigo-400 font-semibold tracking-wider font-mono">
+                                        {currentUser.role === 'admin' ? 'ADMIN' : `CNIC: ${currentUser.data.cnic}`}
+                                    </p>
+                                </div>
+                                <button 
+                                    onClick={handleLogout}
+                                    className="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white px-3.5 py-2 rounded-xl text-sm border border-red-500/20 hover:border-red-500 transition-all duration-200 flex items-center space-x-1.5 font-medium"
+                                >
+                                    <IconLogout />
+                                    <span>Logout</span>
+                                </button>
+                            </div>
+                        )}
+                    </header>
+
+                    {/* Main Content */}
+                    <main className="flex-1 flex flex-col p-6 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/60 overflow-y-auto">
+                        {activeView === 'auth' && <AuthView onLogin={handleLogin} />}
+                        {activeView === 'customer_dashboard' && <CustomerDashboard user={currentUser.data} />}
+                        {activeView === 'admin_dashboard' && <AdminDashboard />}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="glass-panel py-3 px-6 text-center text-xs text-slate-500 border-t border-white/5 font-mono">
+                        © 2026 Image Filter Studio GUI V2.0 • Created based on C++ Core
+                    </footer>
+                </div>
+            );
+        };
+
+        // --- AUTHENTICATION VIEW ---
+        const AuthView = ({ onLogin }) => {
+            const [activeTab, setActiveTab] = useState('customer_login'); // customer_login, customer_register, admin_login
+            const [cnic, setCnic] = useState('');
+            const [password, setPassword] = useState('');
+            const [fullName, setFullName] = useState('');
+            const [confirmPassword, setConfirmPassword] = useState('');
+            const [error, setError] = useState('');
+            const [attemptsLeft, setAttemptsLeft] = useState(3);
+
+            // Validation Helpers (Matching C++ specifications)
+            const isExactly13Digits = (s) => /^\d{13}$/.test(s);
+            const isValidPassword = (s) => {
+                if (s.length !== 9) return false;
+                const hasUpper = /[A-Z]/.test(s);
+                const hasDigit = /\d/.test(s);
+                return hasUpper && hasDigit;
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                setError('');
+
+                if (activeTab === 'customer_login') {
+                    if (!cnic || !password) {
+                        setError('Please enter both CNIC and password.');
+                        return;
+                    }
+                    const customers = getCustomers();
+                    const customer = customers.find(c => c.cnic === cnic);
+                    
+                    if (!customer || customer.password !== password) {
+                        const newAttempts = attemptsLeft - 1;
+                        if (newAttempts <= 0) {
+                            setError('Too many failed attempts. Login locked.');
+                            setAttemptsLeft(0);
+                        } else {
+                            setError(`Invalid credentials. Attempts left: ${newAttempts}`);
+                            setAttemptsLeft(newAttempts);
+                        }
+                        return;
+                    }
+
+                    if (customer.isBlocked) {
+                        setError('Account is blocked. Contact administrator.');
+                        return;
+                    }
+
+                    // Success login
+                    onLogin('customer', customer);
+
+                } else if (activeTab === 'customer_register') {
+                    if (!cnic || !password || !fullName || !confirmPassword) {
+                        setError('All fields are required.');
+                        return;
+                    }
+                    if (!isExactly13Digits(cnic)) {
+                        setError('CNIC must be exactly 13 digits (numeric).');
+                        return;
+                    }
+                    const customers = getCustomers();
+                    if (customers.some(c => c.cnic === cnic)) {
+                        setError('CNIC is already registered.');
+                        return;
+                    }
+                    if (!isValidPassword(password)) {
+                        setError('Password must be exactly 9 characters with at least 1 uppercase letter and 1 digit.');
+                        return;
+                    }
+                    if (password !== confirmPassword) {
+                        setError('Passwords do not match.');
+                        return;
+                    }
+
+                    // Success registration
+                    const newCustomer = { cnic, password, fullName, isBlocked: false };
+                    const updated = [...customers, newCustomer];
+                    saveCustomers(updated);
+                    setError('');
+                    alert('Registration Successful! Please login now.');
+                    setActiveTab('customer_login');
+                    // Reset fields
+                    setPassword('');
+                    setConfirmPassword('');
+
+                } else if (activeTab === 'admin_login') {
+                    if (cnic === 'admin' && password === 'admin123') {
+                        onLogin('admin', { username: 'admin' });
+                    } else {
+                        setError('Invalid administrator credentials.');
+                    }
+                }
+            };
+
+            return (
+                <div className="flex-1 flex items-center justify-center py-10">
+                    <div className="w-full max-w-md glass-panel p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                        {/* Decorative Gradient Glows */}
+                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                        {/* Title */}
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl font-bold text-slate-100 tracking-tight">Welcome Back</h2>
+                            <p className="text-xs text-slate-400 mt-1">Authenticate to access the Image Filter workspace</p>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className="flex space-x-1 p-1 bg-slate-900/80 rounded-2xl mb-6">
+                            <button 
+                                onClick={() => { setActiveTab('customer_login'); setError(''); }}
+                                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all duration-200 ${activeTab === 'customer_login' ? 'bg-indigo-600 text-white shadow shadow-indigo-500/20' : 'text-slate-400 hover:text-slate-200'}`}
+                            >
+                                Customer Login
+                            </button>
+                            <button 
+                                onClick={() => { setActiveTab('customer_register'); setError(''); }}
+                                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all duration-200 ${activeTab === 'customer_register' ? 'bg-indigo-600 text-white shadow shadow-indigo-500/20' : 'text-slate-400 hover:text-slate-200'}`}
+                            >
+                                Register
+                            </button>
+                            <button 
+                                onClick={() => { setActiveTab('admin_login'); setError(''); }}
+                                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all duration-200 ${activeTab === 'admin_login' ? 'bg-indigo-600 text-white shadow shadow-indigo-500/20' : 'text-slate-400 hover:text-slate-200'}`}
+                            >
+                                Admin Panel
+                            </button>
+                        </div>
+
+                        {/* Error Alert */}
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-2xl text-xs mb-5 font-mono flex items-center space-x-2 animate-pulse">
+                                <span>⚠️</span>
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {activeTab === 'customer_register' && (
+                                <div>
+                                    <label className="block text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-1.5 ml-1">Full Name</label>
+                                    <div className="relative">
+                                        <input 
+                                            type="text" 
+                                            required
+                                            placeholder="Enter your name" 
+                                            value={fullName}
+                                            onChange={e => setFullName(e.target.value)}
+                                            className="w-full bg-slate-900 border border-white/5 rounded-2xl px-4 py-3 pl-11 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-200 font-medium"
+                                        />
+                                        <span className="absolute left-4 top-3.5 text-slate-500"><IconUser /></span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-1.5 ml-1">
+                                    {activeTab === 'admin_login' ? 'Admin ID' : 'CNIC (National ID)'}
+                                </label>
+                                <div className="relative">
+                                    <input 
+                                        type="text" 
+                                        required
+                                        maxLength={activeTab === 'admin_login' ? 30 : 13}
+                                        placeholder={activeTab === 'admin_login' ? 'Enter Admin ID' : '13-digit CNIC'} 
+                                        value={cnic}
+                                        onChange={e => setCnic(e.target.value)}
+                                        className="w-full bg-slate-900 border border-white/5 rounded-2xl px-4 py-3 pl-11 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-200 font-medium"
+                                    />
+                                    <span className="absolute left-4 top-3.5 text-slate-500"><IconUser /></span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-1.5 ml-1">Password</label>
+                                <div className="relative">
+                                    <input 
+                                        type="password" 
+                                        required
+                                        placeholder={activeTab === 'customer_register' ? '9 chars (1 Upper, 1 Digit)' : 'Password'} 
+                                        value={password}
+                                        onChange={e => setPassword(e.target.value)}
+                                        className="w-full bg-slate-900 border border-white/5 rounded-2xl px-4 py-3 pl-11 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-200 font-medium"
+                                    />
+                                    <span className="absolute left-4 top-3.5 text-slate-500"><IconLock /></span>
+                                </div>
+                            </div>
+
+                            {activeTab === 'customer_register' && (
+                                <div>
+                                    <label className="block text-[10px] font-semibold text-slate-400 tracking-widest uppercase mb-1.5 ml-1">Confirm Password</label>
+                                    <div className="relative">
+                                        <input 
+                                            type="password" 
+                                            required
+                                            placeholder="Verify password" 
+                                            value={confirmPassword}
+                                            onChange={e => setConfirmPassword(e.target.value)}
+                                            className="w-full bg-slate-900 border border-white/5 rounded-2xl px-4 py-3 pl-11 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-200 font-medium"
+                                        />
+                                        <span className="absolute left-4 top-3.5 text-slate-500"><IconLock /></span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <button 
+                                type="submit" 
+                                disabled={attemptsLeft <= 0 && activeTab === 'customer_login'}
+                                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-2xl shadow-indigo-500/20 shadow-md transition-all duration-200 mt-6 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {activeTab === 'customer_login' ? 'Login Workspace' : activeTab === 'customer_register' ? 'Register Account' : 'Authenticate Admin'}
+                            </button>
+                        </form>
+
+                        {/* Info Footer */}
+                        {activeTab === 'customer_register' && (
+                            <div className="mt-5 text-[10px] text-slate-400 font-mono text-center p-3 bg-slate-900/50 rounded-2xl border border-white/5">
+                                Note: CNIC must be 13 numbers. Password must be exactly 9 characters, including at least one uppercase letter and one digit.
+                            </div>
+                        )}
+                        {activeTab === 'admin_login' && (
+                            <div className="mt-5 text-[10px] text-slate-400 font-mono text-center p-3 bg-slate-900/50 rounded-2xl border border-white/5">
+                                Try default admin credentials: <br/>ID: <span className="text-indigo-400 font-bold select-all">admin</span> | Pass: <span className="text-indigo-400 font-bold select-all">admin123</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- CUSTOMER DASHBOARD ---
+        const CustomerDashboard = ({ user }) => {
+            const [imageLoaded, setImageLoaded] = useState(false);
+            const [activeFilterTab, setActiveFilterTab] = useState('canvas'); // canvas, ascii
+            const [pipeline, setPipeline] = useState([]); // Array of filter names
+            const [brightnessVal, setBrightnessVal] = useState(30);
+            const [asciiText, setAsciiText] = useState("");
+            const [sessionsList, setSessionsList] = useState([]);
+            const [catalog, setCatalog] = useState([]);
+            
+            const originalCanvasRef = useRef(null);
+            const processedCanvasRef = useRef(null);
+            const fileInputRef = useRef(null);
+
+            // Load personal session history
+            useEffect(() => {
+                const sessions = getSessions();
+                const personal = sessions.filter(s => s.cnic === user.cnic);
+                setSessionsList(personal);
+                setCatalog(getCatalog());
+            }, [user.cnic]);
+
+            // Re-run pipeline canvas calculations whenever pipeline, image state, or parameters change
+            useEffect(() => {
+                if (imageLoaded) {
+                    processImage();
+                }
+            }, [pipeline, brightnessVal, imageLoaded]);
+
+            // Process image helper
+            const processImage = () => {
+                const oCanvas = originalCanvasRef.current;
+                const pCanvas = processedCanvasRef.current;
+                if (!oCanvas || !pCanvas) return;
+
+                const oCtx = oCanvas.getContext('2d');
+                const pCtx = pCanvas.getContext('2d');
+
+                // Reset processed canvas sizing
+                pCanvas.width = oCanvas.width;
+                pCanvas.height = oCanvas.height;
+
+                // Grab original pixels
+                const imgData = oCtx.getImageData(0, 0, oCanvas.width, oCanvas.height);
+                
+                // Execute filter algorithms in-place on pixel arrays
+                applyFiltersToImageData(imgData, pipeline, brightnessVal);
+                
+                // Redraw modified pixels
+                pCtx.putImageData(imgData, 0, 0);
+
+                // Compute retro ASCII art string from the result
+                const ascii = generateASCII(imgData);
+                setAsciiText(ascii);
+            };
+
+            // Trigger file load
+            const handleFileChange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = originalCanvasRef.current;
+                        const ctx = canvas.getContext('2d');
+
+                        // Set canvas sizes based on image dimensions
+                        // Scale down if extremely large for smooth real-time filter previews
+                        const maxDim = 600;
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) {
+                                h = Math.floor((h * maxDim) / w);
+                                w = maxDim;
+                            } else {
+                                w = Math.floor((w * maxDim) / h);
+                                h = maxDim;
+                            }
+                        }
+
+                        canvas.width = w;
+                        canvas.height = h;
+                        ctx.drawImage(img, 0, 0, w, h);
+
+                        setImageLoaded(true);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            };
+
+            // Generate synthetic 40x20 test pattern (identical to C++ math algorithm)
+            const handleGeneratePattern = () => {
+                const canvas = originalCanvasRef.current;
+                const ctx = canvas.getContext('2d');
+                
+                const w = 40;
+                const h = 20;
+                canvas.width = w;
+                canvas.height = h;
+
+                const imgData = ctx.createImageData(w, h);
+                const data = imgData.data;
+
+                for (let i = 0; i < h; i++) {
+                    for (let j = 0; j < w; j++) {
+                        const idx = 4 * (i * w + j);
+                        data[idx] = (i * 12) % 256;      // R Channel
+                        data[idx+1] = (j * 6) % 256;     // G Channel
+                        data[idx+2] = ((i + j) * 5) % 256; // B Channel
+                        data[idx+3] = 255;               // Alpha
+                    }
+                }
+                ctx.putImageData(imgData, 0, 0);
+                setImageLoaded(true);
+            };
+
+            // Add filter to pipeline stack (checks active status in Admin Catalog first)
+            const addFilterToPipeline = (filterName) => {
+                const filterDef = catalog.find(f => f.name === filterName);
+                if (filterDef && !filterDef.active) {
+                    alert(`The filter "${filterDef.label}" is currently disabled by Admin catalog.`);
+                    return;
+                }
+                if (pipeline.length >= 20) {
+                    alert("Maximum pipeline length of 20 filters reached.");
+                    return;
+                }
+                setPipeline([...pipeline, filterName]);
+            };
+
+            // Remove specific filter step from stack
+            const removeFilterAt = (index) => {
+                const updated = [...pipeline];
+                updated.splice(index, 1);
+                setPipeline(updated);
+            };
+
+            // Save processed image as file download & record session log
+            const handleSaveImage = () => {
+                if (!imageLoaded) return;
+                const pCanvas = processedCanvasRef.current;
+                
+                // Formulate pipeline description string (e.g. Invert>RedChannel>)
+                let pipelineDesc = "";
+                pipeline.forEach(f => {
+                    pipelineDesc += f + ">";
+                });
+
+                // Generate timestamp
+                const now = new Date();
+                const ts = now.toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/:/g, '').replace(/-/g, '');
+                const fileName = `${user.cnic}_${ts}.png`;
+
+                // Anchor link download trigger
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = pCanvas.toDataURL();
+                link.click();
+
+                // Append session to DB
+                const sessionTime = now.toISOString().split('T')[0] + ' ' + now.toTimeString().split(' ')[0];
+                const newSession = {
+                    cnic: user.cnic,
+                    timestamp: sessionTime,
+                    pipeline: pipelineDesc || "None>",
+                    outputPath: fileName
+                };
+
+                const sessions = getSessions();
+                const updated = [newSession, ...sessions];
+                saveSessions(updated);
+                
+                // Update local UI state
+                setSessionsList([newSession, ...sessionsList]);
+                alert("Session Saved & Logged successfully!");
+            };
+
+            return (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch flex-1">
+                    {/* Left Column: Image Import & Pipeline Builder */}
+                    <div className="lg:col-span-4 flex flex-col space-y-6">
+                        {/* Source Import Card */}
+                        <div className="glass-panel p-6 rounded-3xl shadow-xl flex flex-col">
+                            <h3 className="text-md font-bold text-slate-200 mb-4 flex items-center space-x-2">
+                                <span className="text-indigo-400"><IconImage /></span>
+                                <span>1. Select Image Source</span>
+                            </h3>
+
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                                <button 
+                                    onClick={() => fileInputRef.current.click()}
+                                    className="bg-indigo-600/10 border border-indigo-500/20 hover:border-indigo-500 text-indigo-300 py-3 rounded-2xl text-xs font-semibold glow-hover transition-all duration-200"
+                                >
+                                    Upload File
+                                </button>
+                                <button 
+                                    onClick={handleGeneratePattern}
+                                    className="bg-emerald-600/10 border border-emerald-500/20 hover:border-emerald-500 text-emerald-300 py-3 rounded-2xl text-xs font-semibold shadow-neon-emerald/5 shadow transition-all duration-200"
+                                >
+                                    Test Pattern (40x20)
+                                </button>
+                            </div>
+                            
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                onChange={handleFileChange} 
+                                accept="image/*"
+                                className="hidden" 
+                            />
+
+                            {imageLoaded ? (
+                                <div className="text-[10px] text-emerald-400 font-mono flex items-center space-x-1 bg-emerald-500/5 p-2.5 rounded-xl border border-emerald-500/10 justify-center">
+                                    <IconCheck />
+                                    <span>Image source loaded: {originalCanvasRef.current?.width}x{originalCanvasRef.current?.height} px</span>
+                                </div>
+                            ) : (
+                                <div className="text-center text-xs text-slate-500 py-4 bg-slate-900/50 rounded-2xl border border-dashed border-white/5 font-mono">
+                                    No image source active
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Pipeline Panel */}
+                        <div className="glass-panel p-6 rounded-3xl shadow-xl flex-1 flex flex-col">
+                            <h3 className="text-md font-bold text-slate-200 mb-2 flex items-center space-x-2">
+                                <span className="text-indigo-400"><IconPlus /></span>
+                                <span>2. Build Filter Pipeline</span>
+                            </h3>
+                            <p className="text-[10px] text-slate-400 mb-4 font-mono uppercase tracking-wider">Sequential Stack (Max 20)</p>
+
+                            {/* Available Filters Grid */}
+                            <div className="grid grid-cols-2 gap-2 mb-6">
+                                {catalog.map(filter => (
+                                    <button 
+                                        key={filter.id}
+                                        onClick={() => addFilterToPipeline(filter.name)}
+                                        disabled={!imageLoaded || !filter.active}
+                                        className={`px-3 py-2.5 rounded-xl text-left text-xs font-medium border flex justify-between items-center transition-all duration-150 ${
+                                            !imageLoaded || !filter.active
+                                                ? 'bg-slate-900/40 text-slate-600 border-white/5 cursor-not-allowed'
+                                                : 'bg-slate-900 border-white/5 hover:border-indigo-500 hover:bg-slate-850 text-slate-300'
+                                        }`}
+                                    >
+                                        <span className="truncate">{filter.label}</span>
+                                        {!filter.active && <span className="text-[8px] bg-red-500/10 text-red-400 border border-red-500/20 px-1 py-0.5 rounded font-mono">OFF</span>}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Pipeline Stack Display */}
+                            <div className="flex-1 flex flex-col bg-slate-950/80 rounded-2xl border border-white/5 p-4 overflow-hidden min-h-[200px]">
+                                <span className="block text-[10px] text-slate-500 font-mono tracking-widest uppercase mb-3">Active Pipeline Pipeline</span>
+                                
+                                <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+                                    {pipeline.length === 0 ? (
+                                        <div className="h-full flex flex-col items-center justify-center text-slate-600 text-xs py-8">
+                                            <span>Add filters from catalog to stack</span>
+                                            <span className="text-[10px] mt-1 text-slate-700">Image is processed in top-down order</span>
+                                        </div>
+                                    ) : (
+                                        pipeline.map((filterName, idx) => {
+                                            const fDef = catalog.find(f => f.name === filterName);
+                                            return (
+                                                <div 
+                                                    key={idx}
+                                                    className="bg-slate-900/90 border border-white/5 px-3 py-2.5 rounded-xl flex items-center justify-between group hover:border-indigo-500/30 transition-all duration-150"
+                                                >
+                                                    <div className="flex items-center space-x-2.5 min-w-0">
+                                                        <span className="text-xs font-bold text-slate-500 font-mono w-4">{idx + 1}.</span>
+                                                        <span className="text-xs font-semibold text-slate-200 truncate">{fDef?.label}</span>
+                                                    </div>
+                                                    
+                                                    <button 
+                                                        onClick={() => removeFilterAt(idx)}
+                                                        className="text-slate-500 hover:text-red-400 p-1 hover:bg-red-500/5 rounded-lg transition-all duration-150"
+                                                    >
+                                                        <IconTrash />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+
+                                {/* Brightness Slider Option if Brightness is in pipeline */}
+                                {pipeline.includes('Brightness') && (
+                                    <div className="mt-4 pt-4 border-t border-white/5 space-y-2 bg-indigo-500/5 p-3 rounded-xl border border-indigo-500/10">
+                                        <div className="flex justify-between text-xs font-medium">
+                                            <span className="text-indigo-300">Brightness Parameter</span>
+                                            <span className="text-indigo-400 font-mono font-bold">{brightnessVal > 0 ? `+${brightnessVal}` : brightnessVal}</span>
+                                        </div>
+                                        <input 
+                                            type="range" 
+                                            min="-100" 
+                                            max="100" 
+                                            value={brightnessVal}
+                                            onChange={e => setBrightnessVal(e.target.value)}
+                                            className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none"
+                                        />
+                                        <div className="flex justify-between text-[8px] text-slate-500 font-mono">
+                                            <span>DARKER (-100)</span>
+                                            <span>LIGHTER (+100)</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {pipeline.length > 0 && (
+                                    <button 
+                                        onClick={() => setPipeline([])}
+                                        className="mt-4 text-[10px] text-center text-red-400 hover:text-red-300 py-2 border border-dashed border-red-500/10 hover:border-red-500/30 rounded-xl font-mono uppercase bg-red-500/5 transition-all duration-150"
+                                    >
+                                        Clear Filter Pipeline
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Center Column: Live Previews */}
+                    <div className="lg:col-span-5 flex flex-col space-y-6">
+                        <div className="glass-panel p-6 rounded-3xl shadow-xl flex-1 flex flex-col">
+                            {/* Preview Tabs */}
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-md font-bold text-slate-200 flex items-center space-x-2">
+                                    <span className="text-indigo-400"><IconEye /></span>
+                                    <span>3. Execution Preview</span>
+                                </h3>
+
+                                <div className="flex space-x-1 p-0.5 bg-slate-900 rounded-xl border border-white/5">
+                                    <button 
+                                        onClick={() => setActiveFilterTab('canvas')}
+                                        className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 flex items-center space-x-1.5 ${activeFilterTab === 'canvas' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}
+                                    >
+                                        <IconImage />
+                                        <span>Canvas</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveFilterTab('ascii')}
+                                        className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 flex items-center space-x-1.5 ${activeFilterTab === 'ascii' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'}`}
+                                    >
+                                        <IconTerminal />
+                                        <span>ASCII</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Canvas visual preview container */}
+                            <div className="flex-1 bg-slate-950/80 rounded-2xl border border-white/5 flex items-center justify-center p-4 relative min-h-[300px] overflow-auto">
+                                {!imageLoaded && (
+                                    <div className="text-slate-600 text-center text-xs flex flex-col items-center">
+                                        <span className="text-slate-700 text-3xl mb-2">🖼️</span>
+                                        <span>Load an image or test pattern to preview</span>
+                                    </div>
+                                )}
+
+                                {/* Hidden original canvas for clean filter read operations */}
+                                <canvas ref={originalCanvasRef} className="hidden" />
+
+                                {/* Main processed view canvas */}
+                                <canvas 
+                                    ref={processedCanvasRef} 
+                                    className={`max-w-full max-h-[450px] object-contain rounded shadow-lg border border-white/5 ${activeFilterTab === 'canvas' && imageLoaded ? 'block' : 'hidden'}`} 
+                                />
+
+                                {/* ASCII display */}
+                                {activeFilterTab === 'ascii' && imageLoaded && (
+                                    <pre className="code-font text-[9px] leading-[8px] tracking-tighter bg-slate-950 text-green-400 p-4 rounded-xl max-h-[450px] overflow-auto select-all w-full text-center border border-green-500/10">
+                                        {asciiText}
+                                    </pre>
+                                )}
+                            </div>
+
+                            {/* Save Panel Actions */}
+                            {imageLoaded && (
+                                <div className="mt-4 pt-4 border-t border-white/5 flex gap-4">
+                                    <button 
+                                        onClick={handleSaveImage}
+                                        className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-2xl shadow-emerald-500/15 shadow transition-all duration-200 flex items-center justify-center space-x-2 text-sm"
+                                    >
+                                        <IconDownload />
+                                        <span>Apply & Export PNG</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right Column: Personal Session History */}
+                    <div className="lg:col-span-3 flex flex-col space-y-6">
+                        <div className="glass-panel p-6 rounded-3xl shadow-xl flex-1 flex flex-col overflow-hidden">
+                            <h3 className="text-md font-bold text-slate-200 mb-2 flex items-center space-x-2">
+                                <span className="text-indigo-400"><IconHistory /></span>
+                                <span>Session Log</span>
+                            </h3>
+                            <p className="text-[10px] text-slate-400 mb-4 font-mono uppercase tracking-wider">Your personal history</p>
+
+                            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                                {sessionsList.length === 0 ? (
+                                    <div className="h-full flex flex-col items-center justify-center text-slate-600 text-xs py-8 text-center font-mono">
+                                        <span>No previous<br/>sessions logged.</span>
+                                    </div>
+                                ) : (
+                                    sessionsList.map((session, idx) => (
+                                        <div 
+                                            key={idx}
+                                            className="bg-slate-900/60 border border-white/5 p-3.5 rounded-2xl text-xs space-y-2 hover:border-white/10 transition-all duration-150"
+                                        >
+                                            <div className="flex justify-between items-center font-mono text-[9px] text-indigo-400 font-semibold">
+                                                <span>{session.timestamp}</span>
+                                                <span className="text-slate-500 font-normal">#{sessionsList.length - idx}</span>
+                                            </div>
+                                            
+                                            <div className="text-slate-200 font-semibold font-mono tracking-wider break-all bg-slate-950 p-2 rounded-xl border border-white/5">
+                                                {session.pipeline}
+                                            </div>
+                                            
+                                            <div className="text-[9px] text-slate-400 flex items-center justify-between font-mono bg-slate-950/40 px-2 py-1 rounded">
+                                                <span className="text-slate-500">Output:</span>
+                                                <span className="truncate max-w-[150px]">{session.outputPath}</span>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- ADMIN DASHBOARD ---
+        const AdminDashboard = () => {
+            const [customersList, setCustomersList] = useState([]);
+            const [sessionsList, setSessionsList] = useState([]);
+            const [catalog, setCatalog] = useState([]);
+            const [adminTab, setAdminTab] = useState('catalog'); // catalog, customers, audit
+
+            useEffect(() => {
+                setCustomersList(getCustomers());
+                setSessionsList(getSessions());
+                setCatalog(getCatalog());
+            }, []);
+
+            // Toggle Catalog item status in localStorage
+            const handleToggleCatalog = (id) => {
+                const updated = catalog.map(f => {
+                    if (f.id === id) {
+                        return { ...f, active: !f.active };
+                    }
+                    return f;
+                });
+                setCatalog(updated);
+                saveCatalog(updated);
+            };
+
+            // Toggle block status
+            const handleToggleBlock = (cnic) => {
+                const updated = customersList.map(c => {
+                    if (c.cnic === cnic) {
+                        return { ...c, isBlocked: !c.isBlocked };
+                    }
+                    return c;
+                });
+                setCustomersList(updated);
+                saveCustomers(updated);
+            };
+
+            // Delete Customer (matching dynamic list rebuild in C++)
+            const handleDeleteCustomer = (cnic) => {
+                if (!confirm(`Are you sure you want to delete customer CNIC: ${cnic}?`)) return;
+                const updated = customersList.filter(c => c.cnic !== cnic);
+                setCustomersList(updated);
+                saveCustomers(updated);
+            };
+
+            return (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch flex-1">
+                    {/* Admin Navigation Sidebar (3 columns) */}
+                    <div className="lg:col-span-3 flex flex-col space-y-6">
+                        <div className="glass-panel p-6 rounded-3xl shadow-xl flex flex-col space-y-2">
+                            <h3 className="text-xs font-bold text-slate-400 font-mono tracking-widest uppercase mb-4 pl-1">Navigation</h3>
+                            
+                            <button 
+                                onClick={() => setAdminTab('catalog')}
+                                className={`w-full py-3 px-4 rounded-2xl text-left text-sm font-semibold transition-all duration-200 flex items-center space-x-3 border ${
+                                    adminTab === 'catalog' 
+                                        ? 'bg-indigo-600/10 border-indigo-500 text-indigo-300 shadow-neon-indigo/5 shadow' 
+                                        : 'bg-transparent border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                                }`}
+                            >
+                                <span>🛠️</span>
+                                <span>Filter Catalog</span>
+                            </button>
+                            
+                            <button 
+                                onClick={() => setAdminTab('customers')}
+                                className={`w-full py-3 px-4 rounded-2xl text-left text-sm font-semibold transition-all duration-200 flex items-center space-x-3 border ${
+                                    adminTab === 'customers' 
+                                        ? 'bg-indigo-600/10 border-indigo-500 text-indigo-300 shadow-neon-indigo/5 shadow' 
+                                        : 'bg-transparent border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                                }`}
+                            >
+                                <span>👥</span>
+                                <span>Manage Customers</span>
+                            </button>
+                            
+                            <button 
+                                onClick={() => setAdminTab('audit')}
+                                className={`w-full py-3 px-4 rounded-2xl text-left text-sm font-semibold transition-all duration-200 flex items-center space-x-3 border ${
+                                    adminTab === 'audit' 
+                                        ? 'bg-indigo-600/10 border-indigo-500 text-indigo-300 shadow-neon-indigo/5 shadow' 
+                                        : 'bg-transparent border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                                }`}
+                            >
+                                <span>📜</span>
+                                <span>Audit Sessions</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Admin Workspace Content (9 columns) */}
+                    <div className="lg:col-span-9 flex flex-col">
+                        {/* Tab 1: Catalog Configuration */}
+                        {adminTab === 'catalog' && (
+                            <div className="glass-panel p-6 rounded-3xl shadow-xl flex-1 flex flex-col">
+                                <h3 className="text-lg font-bold text-slate-200 mb-2 flex items-center space-x-2">
+                                    <span className="text-indigo-400">⚙️</span>
+                                    <span>Filter Catalog Configuration</span>
+                                </h3>
+                                <p className="text-xs text-slate-400 mb-6">Enable or disable filters. Disabled filters are locked in the pipeline studio.</p>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-y-auto max-h-[500px] pr-1">
+                                    {catalog.map(filter => (
+                                        <div 
+                                            key={filter.id} 
+                                            className="bg-slate-900/60 border border-white/5 p-4 rounded-2xl flex items-center justify-between hover:border-white/10 transition-all duration-150"
+                                        >
+                                            <div className="space-y-1">
+                                                <div className="flex items-center space-x-2.5">
+                                                    <span className="text-xs font-bold text-slate-500 font-mono">#{filter.id}</span>
+                                                    <h4 className="text-sm font-bold text-slate-200">{filter.label}</h4>
+                                                </div>
+                                                <p className="text-[11px] text-slate-400 font-mono">{filter.desc}</p>
+                                            </div>
+
+                                            <div onClick={() => handleToggleCatalog(filter.id)} className="flex items-center space-x-2">
+                                                <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${filter.active ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-slate-800 text-slate-500 border border-slate-700'}`}>
+                                                    {filter.active ? 'ACTIVE' : 'LOCKED'}
+                                                </span>
+                                                <IconToggle active={filter.active} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tab 2: Customer Management */}
+                        {adminTab === 'customers' && (
+                            <div className="glass-panel p-6 rounded-3xl shadow-xl flex-1 flex flex-col">
+                                <h3 className="text-lg font-bold text-slate-200 mb-2 flex items-center space-x-2">
+                                    <span className="text-indigo-400">👥</span>
+                                    <span>Platform Customer Registry</span>
+                                </h3>
+                                <p className="text-xs text-slate-400 mb-6">Block users to deny login access, or delete user records permanently.</p>
+
+                                <div className="flex-1 overflow-x-auto">
+                                    <table className="w-full text-left text-xs border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-white/5 text-[10px] text-slate-400 font-mono tracking-widest uppercase bg-slate-900/30">
+                                                <th className="py-3 px-4">CNIC Identifier</th>
+                                                <th className="py-3 px-4">Full Name</th>
+                                                <th className="py-3 px-4">Auth Hash</th>
+                                                <th className="py-3 px-4">Status</th>
+                                                <th className="py-3 px-4 text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5">
+                                            {customersList.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan="5" className="py-8 text-center text-slate-500 font-mono">No customers registered</td>
+                                                </tr>
+                                            ) : (
+                                                customersList.map((customer, idx) => (
+                                                    <tr key={idx} className="hover:bg-white/[0.01] transition-colors duration-100">
+                                                        <td className="py-4 px-4 font-mono font-bold text-slate-300">{customer.cnic}</td>
+                                                        <td className="py-4 px-4 font-semibold text-slate-200">{customer.fullName}</td>
+                                                        <td className="py-4 px-4 font-mono text-slate-500">{customer.password.replace(/./g, '*')}</td>
+                                                        <td className="py-4 px-4">
+                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${
+                                                                customer.isBlocked 
+                                                                    ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
+                                                                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                                            }`}>
+                                                                {customer.isBlocked ? 'Blocked' : 'Active'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-4 px-4 flex justify-center space-x-2">
+                                                            <button 
+                                                                onClick={() => handleToggleBlock(customer.cnic)}
+                                                                className={`px-3 py-1.5 rounded-xl font-medium transition-all duration-150 ${
+                                                                    customer.isBlocked 
+                                                                        ? 'bg-emerald-600/10 hover:bg-emerald-600 border border-emerald-500/20 text-emerald-300 hover:text-white' 
+                                                                        : 'bg-yellow-600/10 hover:bg-yellow-600 border border-yellow-500/20 text-yellow-300 hover:text-white'
+                                                                }`}
+                                                            >
+                                                                {customer.isBlocked ? 'Unblock' : 'Block'}
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleDeleteCustomer(customer.cnic)}
+                                                                className="bg-red-600/10 hover:bg-red-600 border border-red-500/20 hover:border-red-650 text-red-400 hover:text-white px-3 py-1.5 rounded-xl font-medium transition-all duration-150"
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tab 3: Session Audit Trail */}
+                        {adminTab === 'audit' && (
+                            <div className="glass-panel p-6 rounded-3xl shadow-xl flex-1 flex flex-col">
+                                <h3 className="text-lg font-bold text-slate-200 mb-2 flex items-center space-x-2">
+                                    <span className="text-indigo-400">📜</span>
+                                    <span>Central Operations Audit Log</span>
+                                </h3>
+                                <p className="text-xs text-slate-400 mb-6">Complete platform history tracking all processed filters and outputs.</p>
+
+                                <div className="flex-1 overflow-y-auto max-h-[500px] pr-1">
+                                    <div className="space-y-3">
+                                        {sessionsList.length === 0 ? (
+                                            <div className="text-center py-8 text-slate-500 font-mono">No pipeline runs audit history found</div>
+                                        ) : (
+                                            sessionsList.map((session, idx) => {
+                                                const cust = customersList.find(c => c.cnic === session.cnic);
+                                                return (
+                                                    <div 
+                                                        key={idx}
+                                                        className="bg-slate-900/60 border border-white/5 p-4 rounded-2xl hover:border-white/10 transition-all duration-150 space-y-2.5"
+                                                    >
+                                                        <div className="flex justify-between items-start">
+                                                            <div>
+                                                                <h4 className="text-xs font-semibold text-slate-200">
+                                                                    {cust ? `${cust.fullName} (${cust.cnic})` : `CNIC: ${session.cnic}`}
+                                                                </h4>
+                                                                <p className="text-[10px] text-slate-400 font-mono mt-0.5">{session.timestamp}</p>
+                                                            </div>
+                                                            <span className="text-[9px] font-mono text-slate-500 bg-slate-950 px-2 py-0.5 rounded border border-white/5">#{sessionsList.length - idx}</span>
+                                                        </div>
+
+                                                        <div className="bg-slate-950 p-2.5 rounded-xl border border-white/5 font-mono text-xs text-indigo-300 font-bold tracking-wider">
+                                                            {session.pipeline}
+                                                        </div>
+
+                                                        <div className="text-[9px] font-mono text-slate-400 bg-slate-950/40 px-2.5 py-1.5 rounded flex justify-between">
+                                                            <span>Export Target:</span>
+                                                            <span className="text-slate-300 font-medium">{session.outputPath}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
